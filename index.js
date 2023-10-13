@@ -56,7 +56,9 @@ firstDiv.append(title, list, addButton);
 addButton.addEventListener("click", () => saveBook());
 
 list.addEventListener("click", ({ target }) => {
-  if (target.nodeName === "P") {
+  if (target.nodeName === "LI") {
+    renderPreview(target.firstElementChild);
+  } else if (target.nodeName === "P") {
     renderPreview(target);
   } else if (target.classList.contains("delete")) {
     deleteBook(target);
@@ -66,8 +68,8 @@ list.addEventListener("click", ({ target }) => {
 });
 
 function editBook(target) {
-  const book = books.find(({ id }) => id === target.parentNode.id);
-  saveBook(book, true);
+  const book = findBook(target.parentNode.id);
+  saveBook({ ...book }, true);
 }
 
 function saveBook(
@@ -75,14 +77,18 @@ function saveBook(
 ) {
   createFormMarkup(book);
 
-  document.querySelector("form").addEventListener("change", (e) => {
-    book[e.target.name] = e.target.value;
+  document.querySelector("form").addEventListener("change", ({ target }) => {
+    book[target.name] = target.value;
   });
 
   document.querySelector("form").addEventListener("submit", (e) => {
     e.preventDefault();
 
-    if (!books.includes(book)) {
+    const bookIndex = books.findIndex((item) => item.id === book.id);
+
+    if (bookIndex !== -1) {
+      books[bookIndex] = book;
+    } else {
       books.push(book);
     }
 
@@ -91,18 +97,28 @@ function saveBook(
   });
 }
 
-function createFormMarkup({ title = "", author = "", img = "", plot = "" }) {
-  secondDiv.innerHTML = `<form>
+function findBook(bookId) {
+  return books.find(({ id }) => id === bookId);
+}
+
+function createFormMarkup({
+  id = "",
+  title = "",
+  author = "",
+  img = "",
+  plot = "",
+} = {}) {
+  secondDiv.innerHTML = `<form data-id='${id}' class='save-book-form'>
         <label>Title: <input type='text' name='title' value='${title}' required></label>
         <label>Author: <input type='text' name='author' value='${author}'></label>
         <label>Image: <input type='url' name='img' value='${img}'></label>
-        <label>Plot: <input type='text' name='plot' value='${plot}'></label>
+        <label>Plot: <textarea name='plot' rows="20">${plot}</textarea></label>
         <button>Save</button>
     </form>`;
 }
 
 function createPreviewMarkup({ id, title, author, img, plot }) {
-  secondDiv.innerHTML = `<div data-id='${id}' class='book-info'>
+  secondDiv.innerHTML = `<div data-id='${id}'>
         <h2>${title}</h2>
         <p>${author}</p>
         <img src='${img}' alt='${title}'>
@@ -111,7 +127,7 @@ function createPreviewMarkup({ id, title, author, img, plot }) {
 }
 
 function renderPreview(target) {
-  const book = books.find(({ title }) => title === target.textContent);
+  const book = findBook(target.parentNode.id);
   createPreviewMarkup(book);
 }
 
@@ -120,7 +136,7 @@ function deleteBook(target) {
   books = books.filter(({ id }) => id !== bookId);
   renderLibrary();
 
-  const bookInfo = secondDiv.querySelector(".book-info");
+  const bookInfo = secondDiv.firstChild;
 
   if (bookInfo && bookInfo.dataset.id === bookId) {
     secondDiv.innerHTML = "";
