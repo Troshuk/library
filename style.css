@@ -8,8 +8,33 @@
     height: 100vh;
 }
 
+.leftDiv li {
+    cursor: pointer;
+}
+
 .rightDiv {
     width: 60%;
     background-color: antiquewhite;
     height: 100vh;
+}
+
+.save-book-form {
+    padding: 10px;
+}
+
+.save-book-form,
+.save-book-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-weight: 600;
+}
+
+.save-book-form button {
+    margin-top: 15px;
+    align-self: center;
+}
+
+.save-book-form textarea {
+    resize: vertical;
 }
