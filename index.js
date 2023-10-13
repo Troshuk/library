@@ -1,5 +1,3 @@
-console.clear();
-
 let books = [
   {
     id: "1",
@@ -41,14 +39,11 @@ let books = [
   },
 ];
 
-// const root = document.getElementById("root");
-const root = document.querySelector("#root");
-
 const firstDiv = document.createElement("div");
 firstDiv.classList.add("leftDiv");
 const secondDiv = document.createElement("div");
 secondDiv.classList.add("rightDiv");
-root.append(firstDiv, secondDiv);
+document.getElementById("root").append(firstDiv, secondDiv);
 
 const title = document.createElement("h1");
 title.textContent = "Book Library";
@@ -57,51 +52,57 @@ const list = document.createElement("ul");
 const addButton = document.createElement("button");
 addButton.textContent = "Add book";
 firstDiv.append(title, list, addButton);
-addButton.addEventListener("click", addBook);
 
-function addBook() {
-  secondDiv.innerHTML = createFormMarkup();
-  const newBook = {
-    id: `${Date.now()}`,
-    title: "",
-    author: "",
-    img: "",
-    plot: "",
-  };
-  fillObject(newBook);
-  const form = document.querySelector("form");
-  form.addEventListener("submit", (e) => {
+addButton.addEventListener("click", () => saveBook());
+
+list.addEventListener("click", ({ target }) => {
+  if (target.nodeName === "P") {
+    renderPreview(target);
+  } else if (target.classList.contains("delete")) {
+    deleteBook(target);
+  } else if (target.classList.contains("edit")) {
+    editBook(target);
+  }
+});
+
+function editBook(target) {
+  const book = books.find(({ id }) => id === target.parentNode.id);
+  saveBook(book, true);
+}
+
+function saveBook(
+  book = { id: `${Date.now()}`, title: "", author: "", img: "", plot: "" }
+) {
+  createFormMarkup(book);
+
+  document.querySelector("form").addEventListener("change", (e) => {
+    book[e.target.name] = e.target.value;
+  });
+
+  document.querySelector("form").addEventListener("submit", (e) => {
     e.preventDefault();
-    books.push(newBook);
+
+    if (!books.includes(book)) {
+      books.push(book);
+    }
+
     renderLibrary();
+    createPreviewMarkup(book);
   });
 }
 
-function fillObject(book) {
-  const inputs = document.querySelectorAll("input");
-  inputs.forEach((input) =>
-    input.addEventListener("change", (e) => {
-      book[e.target.name] = e.target.value;
-    })
-  );
-}
-
-function saveBook(event) {
-  event.target;
-}
-
-function createFormMarkup() {
-  return `<form>
-        <label>Title: <input type='text' name='title'></label>
-        <label>Author: <input type='text' name='author'></label>
-        <label>Image: <input type='url' name='img'></label>
-        <label>Plot: <input type='text' name='plot'></label>
+function createFormMarkup({ title = "", author = "", img = "", plot = "" }) {
+  secondDiv.innerHTML = `<form>
+        <label>Title: <input type='text' name='title' value='${title}' required></label>
+        <label>Author: <input type='text' name='author' value='${author}'></label>
+        <label>Image: <input type='url' name='img' value='${img}'></label>
+        <label>Plot: <input type='text' name='plot' value='${plot}'></label>
         <button>Save</button>
     </form>`;
 }
 
 function createPreviewMarkup({ id, title, author, img, plot }) {
-  return `<div data-id='${id}' class='book-info'>
+  secondDiv.innerHTML = `<div data-id='${id}' class='book-info'>
         <h2>${title}</h2>
         <p>${author}</p>
         <img src='${img}' alt='${title}'>
@@ -109,14 +110,13 @@ function createPreviewMarkup({ id, title, author, img, plot }) {
     </div>`;
 }
 
-function renderPreview(event) {
-  const bookTitle = event.target.textContent;
-  const book = books.find(({ title }) => title === bookTitle);
-  secondDiv.innerHTML = createPreviewMarkup(book);
+function renderPreview(target) {
+  const book = books.find(({ title }) => title === target.textContent);
+  createPreviewMarkup(book);
 }
 
-function deleteBook(event) {
-  const bookId = event.target.parentNode.id;
+function deleteBook(target) {
+  const bookId = target.parentNode.id;
   books = books.filter(({ id }) => id !== bookId);
   renderLibrary();
 
@@ -128,7 +128,7 @@ function deleteBook(event) {
 }
 
 function renderLibrary() {
-  const markup = books
+  list.innerHTML = books
     .map(({ id, title }) => {
       return `<li id='${id}'>
           <p class='book-title'>${title}</p>
@@ -137,15 +137,6 @@ function renderLibrary() {
         </li>`;
     })
     .join("");
-
-  // list.insertAdjacentHTML("beforeend", markup);
-  list.innerHTML = markup;
-  const titles = document.querySelectorAll(".book-title");
-  titles.forEach((title) => title.addEventListener("click", renderPreview));
-  const deleteButtons = document.querySelectorAll(".delete");
-  deleteButtons.forEach((button) =>
-    button.addEventListener("click", deleteBook)
-  );
 }
 
 renderLibrary();
