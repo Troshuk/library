@@ -1,4 +1,4 @@
-import { books } from "./libraryData.js";
+import { getBooks, setBooks } from "./libraryData.js";
 import {
   createFormMarkup,
   createPreviewMarkup,
@@ -51,6 +51,7 @@ function saveBook(
     e.preventDefault();
 
     const bookIndex = findIndex(book.id);
+    const books = getBooks();
 
     if (bookIndex !== -1) {
       books[bookIndex] = book;
@@ -58,17 +59,19 @@ function saveBook(
       books.push(book);
     }
 
+    setBooks(books);
+
     list.innerHTML = renderLibrary(books);
     secondDiv.innerHTML = createPreviewMarkup(book);
   });
 }
 
 function findIndex(bookId) {
-  return books.findIndex((item) => item.id === bookId);
+  return getBooks().findIndex((item) => item.id === bookId);
 }
 
 function findBook(bookId) {
-  return books.find(({ id }) => id === bookId);
+  return getBooks().find(({ id }) => id === bookId);
 }
 
 function renderPreview(target) {
@@ -79,7 +82,9 @@ function renderPreview(target) {
 function deleteBook(target) {
   const bookId = target.parentNode.id;
   const bookIndex = findIndex(bookId);
+  const books = getBooks();
   books.splice(findIndex(bookId), 1);
+  setBooks(books);
   list.innerHTML = renderLibrary(books);
 
   const bookInfo = secondDiv.firstChild;
@@ -89,4 +94,4 @@ function deleteBook(target) {
   }
 }
 
-list.innerHTML = renderLibrary(books);
+list.innerHTML = renderLibrary(getBooks());
