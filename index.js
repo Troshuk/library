@@ -2,26 +2,17 @@ import { getBooks, setBooks } from "./libraryData.js";
 import {
   createFormMarkup,
   createPreviewMarkup,
+  createNotification,
   renderLibrary,
+  secondDiv,
 } from "./markups.js";
 
-const firstDiv = document.createElement("div");
-firstDiv.classList.add("leftDiv");
-const secondDiv = document.createElement("div");
-secondDiv.classList.add("rightDiv");
-document.getElementById("root").append(firstDiv, secondDiv);
+const addBookElement = document.querySelector("div.leftDiv button");
+const bookListElement = document.querySelector("div.leftDiv ul");
 
-const title = document.createElement("h1");
-title.textContent = "Book Library";
-title.style.fontSize = "40px";
-const list = document.createElement("ul");
-const addButton = document.createElement("button");
-addButton.textContent = "Add book";
-firstDiv.append(title, list, addButton);
+addBookElement.addEventListener("click", () => saveBook());
 
-addButton.addEventListener("click", () => saveBook());
-
-list.addEventListener("click", ({ target }) => {
+bookListElement.addEventListener("click", ({ target }) => {
   if (target.nodeName === "LI") {
     renderPreview(target.firstElementChild);
   } else if (target.nodeName === "P") {
@@ -41,13 +32,15 @@ function editBook(target) {
 function saveBook(
   book = { id: `${Date.now()}`, title: "", author: "", img: "", plot: "" }
 ) {
-  secondDiv.innerHTML = createFormMarkup(book);
+  createFormMarkup(book);
 
-  document.querySelector("form").addEventListener("change", ({ target }) => {
+  const formElement = document.querySelector("form");
+
+  formElement.addEventListener("change", ({ target }) => {
     book[target.name] = target.value;
   });
 
-  document.querySelector("form").addEventListener("submit", (e) => {
+  formElement.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const bookIndex = findIndex(book.id);
@@ -55,14 +48,16 @@ function saveBook(
 
     if (bookIndex !== -1) {
       books[bookIndex] = book;
+      createNotification(`Book "${book.title}" has been successfully updated`);
     } else {
       books.push(book);
+      createNotification(
+        `New book "${book.title}" has been successfully added to the library`
+      );
     }
 
     setBooks(books);
-
-    list.innerHTML = renderLibrary(books);
-    secondDiv.innerHTML = createPreviewMarkup(book);
+    createPreviewMarkup(book);
   });
 }
 
@@ -76,22 +71,22 @@ function findBook(bookId) {
 
 function renderPreview(target) {
   const book = findBook(target.parentNode.id);
-  secondDiv.innerHTML = createPreviewMarkup(book);
+  createPreviewMarkup(book);
 }
 
 function deleteBook(target) {
   const bookId = target.parentNode.id;
-  const bookIndex = findIndex(bookId);
   const books = getBooks();
-  books.splice(findIndex(bookId), 1);
+  const book = books.splice(findIndex(bookId), 1);
   setBooks(books);
-  list.innerHTML = renderLibrary(books);
 
-  const bookInfo = secondDiv.firstChild;
-
-  if (bookInfo && bookInfo.dataset.id === bookId) {
+  if (secondDiv?.firstChild?.dataset.id === bookId) {
     secondDiv.innerHTML = "";
   }
+
+  createNotification(
+    `Book "${book[0].title}" has been successfully removed from the library`
+  );
 }
 
-list.innerHTML = renderLibrary(getBooks());
+renderLibrary(getBooks());

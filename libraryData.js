@@ -1,3 +1,5 @@
+import { renderLibrary } from "./markups.js";
+
 const books = [
   {
     id: "1",
@@ -45,4 +47,5 @@ export function getBooks() {
 
 export function setBooks(books) {
   localStorage.setItem("books", JSON.stringify(books));
+  renderLibrary(books);
 }
