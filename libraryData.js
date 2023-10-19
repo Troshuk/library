@@ -1,4 +1,4 @@
-export const books = [
+const books = [
   {
     id: "1",
     title: `Apple. Computer evolution`,
@@ -38,3 +38,11 @@ export const books = [
        What tools does he need to use?`,
   },
 ];
+
+export function getBooks() {
+  return JSON.parse(localStorage.getItem("books")) ?? books;
+}
+
+export function setBooks(books) {
+  localStorage.setItem("books", JSON.stringify(books));
+}
