@@ -70,13 +70,6 @@ function renderNotification(text) {
   return notificationElement;
 }
 
-createNotification("The path of the Scrum Master. #ScrumMasterWay");
-createNotification("The path of the Scrum Master. #ScrumMasterWay");
-createNotification("The path of the Scrum Master. #ScrumMasterWay");
-createNotification("The path of the Scrum Master. #ScrumMasterWay");
-createNotification("The path of the Scrum Master. #ScrumMasterWay");
-createNotification("The path of the Scrum Master. #ScrumMasterWay");
-
 export function createNotification(text) {
   const notificationElement = notificationsElement.insertAdjacentElement(
     "beforeend",
